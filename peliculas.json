@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "157faf6c-4cff-45f5-b2ff-3594797a40e8",
+    "titulo": "El hombre invisible",
+    "director": "",
+    "tipo": "Película",
+    "valoracion": 3.5,
+    "etiquetas": [
+      "Miedo"
+    ],
+    "review": "Sin más, sobrevalorada",
+    "fechaVisionado": "2026-07-26"
+  }
+]

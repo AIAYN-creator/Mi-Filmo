@@ -51,6 +51,9 @@
         <i data-lucide="plus" class="w-4 h-4"></i>
         <span class="hidden sm:inline">Añadir</span>
       </button>
+      <button id="refreshBtn" type="button" class="p-2 rounded-lg border border-brand-line text-brand-textdim hover:text-brand-gold hover:border-brand-gold transition" title="Recargar desde GitHub">
+        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+      </button>
       <button id="settingsBtn" type="button" class="p-2 rounded-lg border border-brand-line text-brand-textdim hover:text-brand-gold hover:border-brand-gold transition" title="Configuración">
         <i data-lucide="settings" class="w-5 h-5"></i>
       </button>
@@ -59,9 +62,9 @@
 </header>
 
 <div class="max-w-6xl mx-auto px-4 mt-4">
-  <div class="flex items-center gap-2 text-xs text-brand-textdim bg-brand-bgsoft border border-brand-line rounded-lg px-3 py-2">
+  <div id="syncBanner" class="flex items-center gap-2 text-xs text-brand-textdim bg-brand-bgsoft border border-brand-line rounded-lg px-3 py-2">
     <i data-lucide="info" class="w-3.5 h-3.5 shrink-0"></i>
-    <span>Modo local: los cambios todavía no se guardan en GitHub. Eso lo conectamos en el siguiente paso.</span>
+    <span>Cargando...</span>
   </div>
 </div>
 
@@ -225,8 +228,8 @@
 <script>
   const TIPOS = ['Película', 'Serie', 'Documental', 'Cortometraje', 'Ensayo Audiovisual', 'Otro'];
 
-  // --- datos de partida: en el siguiente paso vendrán de un GET a peliculas.json en GitHub ---
-  let items = [
+  // --- fallback cuando no hay repositorio configurado ---
+  const DEFAULT_MOCK_ITEMS = [
     {
       id: "rev-001",
       titulo: "Stalker",
@@ -249,10 +252,142 @@
     }
   ];
 
+  let items = DEFAULT_MOCK_ITEMS.slice();
+
+  // --- estado de sincronización con GitHub ---
+  let repo = localStorage.getItem('miFilmo_repo') || '';
+  let token = localStorage.getItem('miFilmo_token') || '';
+  let currentSha = null;
+
   const state = { search: '', tipo: 'Todas', rating: 'Todas' };
 
   function esc(str){
     return String(str ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  function utf8ToBase64(str){
+    const bytes = new TextEncoder().encode(str);
+    let binary = '';
+    bytes.forEach(b => { binary += String.fromCharCode(b); });
+    return btoa(binary);
+  }
+
+  function base64ToUtf8(b64){
+    const binary = atob(b64);
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  }
+
+  function normalizeRepo(value){
+    return value.trim()
+      .replace(/^https?:\/\/github\.com\//i, '')
+      .replace(/\.git$/i, '')
+      .replace(/\/+$/, '');
+  }
+
+  function githubHeaders(){
+    const h = { 'Accept': 'application/vnd.github+json' };
+    if (token) h['Authorization'] = `Bearer ${token}`;
+    return h;
+  }
+
+  function setSyncStatus(kind, text){
+    const el = document.getElementById('syncBanner');
+    const icon = { local: 'info', loading: 'loader-2', ok: 'check-circle-2', error: 'alert-triangle' }[kind] || 'info';
+    const color = {
+      local: 'text-brand-textdim border-brand-line',
+      loading: 'text-brand-gold border-brand-line',
+      ok: 'text-brand-gold border-brand-gold/40',
+      error: 'text-brand-red border-brand-red/50'
+    }[kind] || 'text-brand-textdim border-brand-line';
+    el.className = `flex items-center gap-2 text-xs bg-brand-bgsoft border rounded-lg px-3 py-2 ${color}`;
+    el.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5 shrink-0 ${kind === 'loading' ? 'animate-spin' : ''}"></i><span>${esc(text)}</span>`;
+    if (window.lucide) lucide.createIcons();
+  }
+
+  // Recarga items/sha desde GitHub sin tocar el banner de estado (lo gestiona cada llamante).
+  async function fetchLatestFromGitHub(){
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/peliculas.json`, { headers: githubHeaders() });
+    if (res.status === 404){
+      currentSha = null;
+      items = [];
+      return 'empty';
+    }
+    if (!res.ok) throw new Error(`GET ${res.status}`);
+    const data = await res.json();
+    currentSha = data.sha;
+    items = JSON.parse(base64ToUtf8(data.content));
+    return 'ok';
+  }
+
+  async function loadFromGitHub(){
+    if (!repo){
+      currentSha = null;
+      items = DEFAULT_MOCK_ITEMS.slice();
+      setSyncStatus('local', 'Modo local: configura tu repositorio en Configuración para sincronizar con GitHub.');
+      render();
+      return;
+    }
+    setSyncStatus('loading', 'Cargando catálogo desde GitHub...');
+    try {
+      const result = await fetchLatestFromGitHub();
+      setSyncStatus('ok', result === 'empty'
+        ? `Conectado a ${repo} — peliculas.json se creará al añadir la primera obra.`
+        : `Sincronizado con ${repo}`);
+    } catch (err){
+      setSyncStatus('error', `No se pudo cargar peliculas.json de ${repo}. Mostrando el último catálogo disponible.`);
+    }
+    render();
+  }
+
+  async function writeToGitHub(newItems, message){
+    if (!repo){
+      setSyncStatus('local', 'Configura tu repositorio en Configuración para poder guardar cambios en GitHub.');
+      openModal('settingsModal');
+      return false;
+    }
+    if (!token){
+      setSyncStatus('error', 'Falta el token de GitHub. Añádelo en Configuración para guardar cambios.');
+      openModal('settingsModal');
+      return false;
+    }
+    setSyncStatus('loading', 'Guardando en GitHub...');
+    try {
+      const body = {
+        message: `Mi Filmo: ${message}`,
+        content: utf8ToBase64(JSON.stringify(newItems, null, 2) + '\n'),
+        branch: 'main'
+      };
+      if (currentSha) body.sha = currentSha;
+
+      const res = await fetch(`https://api.github.com/repos/${repo}/contents/peliculas.json`, {
+        method: 'PUT',
+        headers: { ...githubHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (res.status === 409){
+        try { await fetchLatestFromGitHub(); } catch (err) { /* si tampoco se puede recargar, se mantiene el estado anterior */ }
+        setSyncStatus('error', 'El catálogo cambió en GitHub mientras editabas. Se ha recargado la versión más reciente — vuelve a intentar el cambio.');
+        render();
+        return false;
+      }
+      if (!res.ok){
+        const errBody = await res.json().catch(() => ({}));
+        setSyncStatus('error', `Error al guardar en GitHub (${res.status}): ${errBody.message || 'inténtalo de nuevo'}`);
+        return false;
+      }
+
+      const resData = await res.json();
+      currentSha = resData.content.sha;
+      items = newItems;
+      setSyncStatus('ok', `Sincronizado con ${repo}`);
+      render();
+      return true;
+    } catch (err){
+      setSyncStatus('error', 'No se pudo conectar con GitHub. Comprueba tu conexión e inténtalo de nuevo.');
+      return false;
+    }
   }
 
   function formatDate(str){
@@ -466,19 +601,33 @@
     openAddModal(item);
   });
 
-  document.getElementById('detailDeleteBtn').addEventListener('click', () => {
+  document.getElementById('detailDeleteBtn').addEventListener('click', async () => {
     const item = items.find(x => x.id === detailItemId);
     if (!item) return;
     const ok = confirm(`¿Seguro que quieres eliminar "${item.titulo}"? Esta acción no se puede deshacer.`);
     if (!ok) return;
-    items = items.filter(x => x.id !== item.id);
-    closeModal('detailModal');
-    render();
+
+    const newItems = items.filter(x => x.id !== item.id);
+
+    if (!repo){
+      items = newItems;
+      closeModal('detailModal');
+      render();
+      return;
+    }
+
+    const btn = document.getElementById('detailDeleteBtn');
+    btn.disabled = true;
+    const success = await writeToGitHub(newItems, `Eliminar "${item.titulo}"`);
+    btn.disabled = false;
+    if (success) closeModal('detailModal');
   });
 
+  document.getElementById('refreshBtn').addEventListener('click', () => loadFromGitHub());
+
   document.getElementById('settingsBtn').addEventListener('click', () => {
-    document.getElementById('repoInput').value = localStorage.getItem('miFilmo_repo') || '';
-    document.getElementById('tokenInput').value = localStorage.getItem('miFilmo_token') || '';
+    document.getElementById('repoInput').value = repo;
+    document.getElementById('tokenInput').value = token;
     openModal('settingsModal');
   });
 
@@ -495,8 +644,15 @@
     if (e.key === 'Escape'){ closeModal('addModal'); closeModal('settingsModal'); closeModal('detailModal'); }
   });
 
-  // --- guardar alta o edición (en memoria; la escritura en GitHub se conecta en el siguiente paso) ---
-  document.getElementById('addForm').addEventListener('submit', e => {
+  function setFormBusy(busy){
+    const btn = document.getElementById('addSubmitBtn');
+    btn.disabled = busy;
+    btn.dataset.label = btn.dataset.label || btn.textContent;
+    btn.textContent = busy ? 'Guardando...' : btn.dataset.label;
+  }
+
+  // --- guardar alta o edición ---
+  document.getElementById('addForm').addEventListener('submit', async e => {
     e.preventDefault();
     const fd = new FormData(e.target);
     const titulo = fd.get('titulo').trim();
@@ -512,30 +668,52 @@
       fechaVisionado: fd.get('fechaVisionado')
     };
 
-    if (editingId){
-      const idx = items.findIndex(x => x.id === editingId);
-      if (idx !== -1) items[idx] = { ...items[idx], ...data };
-    } else {
-      items.unshift({ id: crypto.randomUUID(), ...data });
+    const newItems = editingId
+      ? items.map(x => x.id === editingId ? { ...x, ...data } : x)
+      : [{ id: crypto.randomUUID(), ...data }, ...items];
+
+    if (!repo){
+      items = newItems;
+      editingId = null;
+      e.target.reset();
+      closeModal('addModal');
+      render();
+      return;
     }
 
-    editingId = null;
-    e.target.reset();
-    closeModal('addModal');
-    render();
+    setFormBusy(true);
+    const success = await writeToGitHub(newItems, editingId ? `Editar "${titulo}"` : `Añadir "${titulo}"`);
+    setFormBusy(false);
+
+    if (success){
+      editingId = null;
+      e.target.reset();
+      closeModal('addModal');
+    }
   });
 
   // --- configuración (PAT + repo, solo en localStorage de este navegador) ---
-  document.getElementById('settingsForm').addEventListener('submit', e => {
+  document.getElementById('settingsForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const repo = document.getElementById('repoInput').value.trim();
-    const token = document.getElementById('tokenInput').value.trim();
-    if (repo) localStorage.setItem('miFilmo_repo', repo); else localStorage.removeItem('miFilmo_repo');
-    if (token) localStorage.setItem('miFilmo_token', token); else localStorage.removeItem('miFilmo_token');
+    const rawRepo = document.getElementById('repoInput').value.trim();
+    const newRepo = rawRepo ? normalizeRepo(rawRepo) : '';
+    const newToken = document.getElementById('tokenInput').value.trim();
+
+    if (newRepo && !/^[\w.-]+\/[\w.-]+$/.test(newRepo)){
+      alert('Formato de repositorio no válido. Usa "usuario/repositorio".');
+      return;
+    }
+
+    if (newRepo) localStorage.setItem('miFilmo_repo', newRepo); else localStorage.removeItem('miFilmo_repo');
+    if (newToken) localStorage.setItem('miFilmo_token', newToken); else localStorage.removeItem('miFilmo_token');
+
+    repo = newRepo;
+    token = newToken;
     closeModal('settingsModal');
+    await loadFromGitHub();
   });
 
-  render();
+  loadFromGitHub();
 </script>
 
 </body>

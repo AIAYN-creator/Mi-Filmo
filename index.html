@@ -92,7 +92,7 @@
 <div id="addModal" class="hidden fixed inset-0 z-40 items-center justify-center p-4 bg-black/70">
   <div class="bg-brand-bgsoft border border-brand-line rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
     <div class="flex items-center justify-between px-5 py-4 border-b border-brand-line">
-      <h2 class="font-display text-xl tracking-wide text-brand-gold">Añadir Nueva Obra</h2>
+      <h2 id="addModalTitle" class="font-display text-xl tracking-wide text-brand-gold">Añadir Nueva Obra</h2>
       <button type="button" data-close-modal="addModal" class="text-brand-textdim hover:text-brand-text">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -100,19 +100,19 @@
     <form id="addForm" class="px-5 py-4 flex flex-col gap-3">
       <label class="text-xs text-brand-textdim">
         Título
-        <input name="titulo" type="text" required placeholder="Título de la obra"
+        <input id="tituloInput" name="titulo" type="text" required placeholder="Título de la obra"
           class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text placeholder-brand-textdim focus:outline-none focus:border-brand-gold transition">
       </label>
 
       <label class="text-xs text-brand-textdim">
         Director / Creador
-        <input name="director" type="text" placeholder="Nombre"
+        <input id="directorInput" name="director" type="text" placeholder="Nombre"
           class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text placeholder-brand-textdim focus:outline-none focus:border-brand-gold transition">
       </label>
 
       <label class="text-xs text-brand-textdim">
         Tipo
-        <select name="tipo" class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-gold transition">
+        <select id="tipoSelect" name="tipo" class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-gold transition">
           <option value="Película">Película</option>
           <option value="Serie">Serie</option>
           <option value="Documental">Documental</option>
@@ -124,19 +124,19 @@
 
       <label class="text-xs text-brand-textdim">
         Valoración (0 a 5, incrementos de 0.5)
-        <input name="valoracion" type="number" step="0.5" min="0" max="5" value="0" required
+        <input id="valoracionInput" name="valoracion" type="number" step="0.5" min="0" max="5" value="0" required
           class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-gold transition">
       </label>
 
       <label class="text-xs text-brand-textdim">
         Etiquetas (separadas por comas)
-        <input name="etiquetas" type="text" placeholder="Fotografía, Obra Maestra"
+        <input id="etiquetasInput" name="etiquetas" type="text" placeholder="Fotografía, Obra Maestra"
           class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text placeholder-brand-textdim focus:outline-none focus:border-brand-gold transition">
       </label>
 
       <label class="text-xs text-brand-textdim">
         Review
-        <textarea name="review" rows="3" placeholder="Tu opinión..."
+        <textarea id="reviewInput" name="review" rows="3" placeholder="Tu opinión..."
           class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text placeholder-brand-textdim focus:outline-none focus:border-brand-gold transition resize-none"></textarea>
       </label>
 
@@ -146,7 +146,7 @@
           class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-gold transition">
       </label>
 
-      <button type="submit" class="mt-2 bg-brand-red hover:bg-brand-red/90 text-white rounded-lg py-2.5 text-sm font-semibold transition">Guardar</button>
+      <button id="addSubmitBtn" type="submit" class="mt-2 bg-brand-red hover:bg-brand-red/90 text-white rounded-lg py-2.5 text-sm font-semibold transition">Guardar</button>
     </form>
   </div>
 </div>
@@ -180,6 +180,15 @@
       <div class="flex items-center gap-1.5 text-xs text-brand-textdim pt-2 border-t border-brand-line">
         <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
         <span id="detailFecha"></span>
+      </div>
+
+      <div class="flex items-center gap-2 pt-1">
+        <button id="detailEditBtn" type="button" class="flex-1 flex items-center justify-center gap-1.5 border border-brand-line hover:border-brand-gold text-brand-text rounded-lg py-2 text-sm font-semibold transition">
+          <i data-lucide="pencil" class="w-4 h-4"></i> Editar
+        </button>
+        <button id="detailDeleteBtn" type="button" class="flex-1 flex items-center justify-center gap-1.5 border border-brand-red text-brand-red hover:bg-brand-red hover:text-white rounded-lg py-2 text-sm font-semibold transition">
+          <i data-lucide="trash-2" class="w-4 h-4"></i> Eliminar
+        </button>
       </div>
     </div>
   </div>
@@ -372,7 +381,10 @@
   });
 
   // --- detalle de obra ---
+  let detailItemId = null;
+
   function openDetail(item){
+    detailItemId = item.id;
     document.getElementById('detailTitulo').textContent = item.titulo;
     document.getElementById('detailDirector').textContent = item.director || 'Director/a desconocido/a';
     document.getElementById('detailTipo').textContent = item.tipo;
@@ -424,9 +436,44 @@
     modal.classList.remove('flex');
   }
 
-  document.getElementById('addBtn').addEventListener('click', () => {
-    document.getElementById('fechaVisionadoInput').value = new Date().toISOString().slice(0, 10);
+  // --- alta / edición de obra (comparten el mismo modal y formulario) ---
+  let editingId = null;
+
+  function openAddModal(item){
+    editingId = item ? item.id : null;
+    document.getElementById('addForm').reset();
+
+    document.getElementById('addModalTitle').textContent = item ? 'Editar Obra' : 'Añadir Nueva Obra';
+    document.getElementById('addSubmitBtn').textContent = item ? 'Guardar cambios' : 'Guardar';
+
+    document.getElementById('tituloInput').value = item ? item.titulo : '';
+    document.getElementById('directorInput').value = item ? (item.director || '') : '';
+    document.getElementById('tipoSelect').value = item ? item.tipo : 'Película';
+    document.getElementById('valoracionInput').value = item ? item.valoracion : 0;
+    document.getElementById('etiquetasInput').value = item ? (item.etiquetas || []).join(', ') : '';
+    document.getElementById('reviewInput').value = item ? (item.review || '') : '';
+    document.getElementById('fechaVisionadoInput').value = item ? item.fechaVisionado : new Date().toISOString().slice(0, 10);
+
     openModal('addModal');
+  }
+
+  document.getElementById('addBtn').addEventListener('click', () => openAddModal(null));
+
+  document.getElementById('detailEditBtn').addEventListener('click', () => {
+    const item = items.find(x => x.id === detailItemId);
+    if (!item) return;
+    closeModal('detailModal');
+    openAddModal(item);
+  });
+
+  document.getElementById('detailDeleteBtn').addEventListener('click', () => {
+    const item = items.find(x => x.id === detailItemId);
+    if (!item) return;
+    const ok = confirm(`¿Seguro que quieres eliminar "${item.titulo}"? Esta acción no se puede deshacer.`);
+    if (!ok) return;
+    items = items.filter(x => x.id !== item.id);
+    closeModal('detailModal');
+    render();
   });
 
   document.getElementById('settingsBtn').addEventListener('click', () => {
@@ -448,15 +495,14 @@
     if (e.key === 'Escape'){ closeModal('addModal'); closeModal('settingsModal'); closeModal('detailModal'); }
   });
 
-  // --- añadir nueva obra (en memoria; la escritura en GitHub se conecta en el siguiente paso) ---
+  // --- guardar alta o edición (en memoria; la escritura en GitHub se conecta en el siguiente paso) ---
   document.getElementById('addForm').addEventListener('submit', e => {
     e.preventDefault();
     const fd = new FormData(e.target);
     const titulo = fd.get('titulo').trim();
     if (!titulo) return;
 
-    items.unshift({
-      id: crypto.randomUUID(),
+    const data = {
       titulo,
       director: fd.get('director').trim(),
       tipo: fd.get('tipo'),
@@ -464,8 +510,16 @@
       etiquetas: fd.get('etiquetas').split(',').map(s => s.trim()).filter(Boolean),
       review: fd.get('review').trim(),
       fechaVisionado: fd.get('fechaVisionado')
-    });
+    };
 
+    if (editingId){
+      const idx = items.findIndex(x => x.id === editingId);
+      if (idx !== -1) items[idx] = { ...items[idx], ...data };
+    } else {
+      items.unshift({ id: crypto.randomUUID(), ...data });
+    }
+
+    editingId = null;
     e.target.reset();
     closeModal('addModal');
     render();

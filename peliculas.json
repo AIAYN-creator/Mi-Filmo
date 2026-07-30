@@ -1,0 +1,22 @@
+[
+  {
+    "id": "rev-001",
+    "titulo": "Stalker",
+    "director": "Andrei Tarkovsky",
+    "tipo": "Película",
+    "valoracion": 5,
+    "etiquetas": ["Fotografía", "Obra Maestra", "Filosofía"],
+    "review": "Una atmósfera insuperable. Cada plano es una pintura en sí mismo.",
+    "fechaVisionado": "2026-07-28"
+  },
+  {
+    "id": "rev-002",
+    "titulo": "Bodrio Espacial 3",
+    "director": "Anónimo",
+    "tipo": "Película",
+    "valoracion": 0,
+    "etiquetas": ["Guion nefasto", "Pérdida de tiempo"],
+    "review": "0 estrellas bien merecidas. Infumable.",
+    "fechaVisionado": "2026-07-30"
+  }
+]

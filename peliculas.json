@@ -1,16 +1,1 @@
-[
-  {
-    "id": "rev-001",
-    "titulo": "Stalker",
-    "director": "Andrei Tarkovsky",
-    "tipo": "Película",
-    "valoracion": 5,
-    "etiquetas": [
-      "Fotografía",
-      "Obra Maestra",
-      "Filosofía"
-    ],
-    "review": "Una atmósfera insuperable. Cada plano es una pintura en sí mismo.",
-    "fechaVisionado": "2026-07-28"
-  }
-]
+[]

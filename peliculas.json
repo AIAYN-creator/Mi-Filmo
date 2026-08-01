@@ -1,5 +1,15 @@
 [
   {
+    "id": "2a723847-de24-4507-b151-b88082b50dac",
+    "titulo": "La Odisea",
+    "director": "Cristopher Nolan",
+    "tipo": "Película",
+    "valoracion": 4,
+    "etiquetas": [],
+    "review": "Nolan es un genio. Una revisión excelente del poema de Homero. Quizás hay trozos donde trata al lector de tonto, pero en general es maravillosa. A parte de ciertos anacronismos es una película estrictamente fiel al poema (o a lo que yo recuerdo de él) pero con el toque personal de Nolan de saltos en el tiempo, forshadowing y todos sus recursos típicos",
+    "fechaVisionado": "2026-08-01"
+  },
+  {
     "id": "aca0d29a-a9c6-4759-99d3-9f5ca784063c",
     "titulo": "Sinsajo Parte 1",
     "director": "Francis Lawrence",

@@ -1,5 +1,19 @@
 [
   {
+    "id": "c56b1355-9e2d-4917-8dfb-bc14adb3fee4",
+    "titulo": "Spiderman: Brand New Day",
+    "director": "Destin Daniel Cretton",
+    "tipo": "Película",
+    "valoracion": 4.5,
+    "etiquetas": [
+      "Obra Maestra",
+      "Oda al Cine",
+      "Marvel"
+    ],
+    "review": "barbaridades, desarrollaré en un futuro",
+    "fechaVisionado": "2026-08-05"
+  },
+  {
     "id": "2a723847-de24-4507-b151-b88082b50dac",
     "titulo": "La Odisea",
     "director": "Cristopher Nolan",

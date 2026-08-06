@@ -1,5 +1,15 @@
 [
   {
+    "id": "f7b04d36-8dc0-4063-a453-18b6a7747808",
+    "titulo": "SINSAJO PARTE 2",
+    "director": "Francis Lawrence",
+    "tipo": "Película",
+    "valoracion": 3.5,
+    "etiquetas": [],
+    "review": "desarrollo luego",
+    "fechaVisionado": "2026-08-06"
+  },
+  {
     "id": "c56b1355-9e2d-4917-8dfb-bc14adb3fee4",
     "titulo": "Spiderman: Brand New Day",
     "director": "Destin Daniel Cretton",

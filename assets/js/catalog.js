@@ -31,7 +31,12 @@ export function normalizeItem(raw) {
     titulo: String(item.titulo ?? '').trim() || 'Sin título',
     director: String(item.director ?? '').trim(),
     tipo: TIPOS_VALIDOS.has(item.tipo) ? item.tipo : 'Otro',
-    valoracion: Number.isFinite(valoracion) ? Math.min(5, Math.max(0, valoracion)) : 0,
+    // Se ajusta a la rejilla de 0.5 además de recortarse al rango: el input del
+    // formulario usa step="0.5" y un 3.7 escrito a mano en el JSON bloqueaba el
+    // guardado con un aviso del navegador fácil de no ver.
+    valoracion: Number.isFinite(valoracion)
+      ? Math.min(5, Math.max(0, Math.round(valoracion * 2) / 2))
+      : 0,
     etiquetas: Array.isArray(item.etiquetas)
       ? item.etiquetas.map((t) => String(t).trim()).filter(Boolean)
       : [],
@@ -41,7 +46,17 @@ export function normalizeItem(raw) {
 }
 
 export function normalizeCatalog(raw) {
-  return Array.isArray(raw) ? raw.map(normalizeItem) : [];
+  if (!Array.isArray(raw)) return [];
+
+  // Un JSON editado a mano puede repetir un id. Sin desduplicar, editar una obra
+  // reescribiría todas las que compartan ese id y borrar una las borraría todas.
+  const vistos = new Set();
+  return raw.map((entry) => {
+    const item = normalizeItem(entry);
+    if (vistos.has(item.id)) item.id = createId();
+    vistos.add(item.id);
+    return item;
+  });
 }
 
 /**

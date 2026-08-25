@@ -97,7 +97,26 @@ function updateCount(shown, total) {
 
 // --- carga y guardado -----------------------------------------------------
 
+/*
+ * Una sola operación de red a la vez. Recargar y guardar tocan los mismos items
+ * y el mismo sha: solaparlas dejaba el estado final a merced de cuál respondiera
+ * antes. Pulsar recargar tres veces seguidas lanzaba tres lecturas en paralelo.
+ */
+let ocupado = false;
+
 async function loadCatalog() {
+  if (ocupado) return;
+  ocupado = true;
+  $('refreshBtn').disabled = true;
+  try {
+    await leerCatalogo();
+  } finally {
+    ocupado = false;
+    $('refreshBtn').disabled = false;
+  }
+}
+
+async function leerCatalogo() {
   if (!client.configured) {
     items = normalizeCatalog(DEMO_ITEMS);
     setSyncStatus('local', 'Modo demostración: no hay repositorio conectado. Ábrelo en Configuración para sincronizar.');
@@ -107,7 +126,7 @@ async function loadCatalog() {
 
   // La copia local se pinta antes de salir a la red: la app abre con contenido
   // incluso sin conexión, y el fetch solo confirma o corrige lo que ya se ve.
-  const cached = readCache(settings.repo);
+  const cached = readCache(settings.repo, settings.branch);
   items = cached ? normalizeCatalog(cached.items) : [];
   render();
 
@@ -116,7 +135,7 @@ async function loadCatalog() {
 
   if (result.ok) {
     items = normalizeCatalog(result.items);
-    writeCache(settings.repo, items);
+    writeCache(settings.repo, settings.branch, items);
     setSyncStatus(
       'ok',
       result.empty
@@ -141,6 +160,16 @@ async function loadCatalog() {
  * Sin repositorio conectado los cambios se quedan en memoria: es el modo demo.
  */
 async function persist(newItems, message) {
+  if (ocupado) return false;
+  ocupado = true;
+  try {
+    return await guardarCatalogo(newItems, message);
+  } finally {
+    ocupado = false;
+  }
+}
+
+async function guardarCatalogo(newItems, message) {
   if (!client.configured) {
     items = normalizeCatalog(newItems);
     setSyncStatus('local', 'Modo demostración: los cambios no se guardan. Conecta un repositorio en Configuración.');
@@ -159,7 +188,7 @@ async function persist(newItems, message) {
 
   if (result.ok) {
     items = normalizeCatalog(newItems);
-    writeCache(settings.repo, items);
+    writeCache(settings.repo, settings.branch, items);
     setSyncStatus('ok', `Sincronizado con ${settings.repo}`);
     render();
     return true;
@@ -169,7 +198,7 @@ async function persist(newItems, message) {
     const fresh = await client.read();
     if (fresh.ok) {
       items = normalizeCatalog(fresh.items);
-      writeCache(settings.repo, items);
+      writeCache(settings.repo, settings.branch, items);
     }
     setSyncStatus(
       'error',
@@ -367,8 +396,8 @@ function wireEvents() {
       return;
     }
 
-    // Cambiar de repositorio invalida la copia local: pertenece al anterior.
-    if (repo !== settings.repo) clearCache();
+    // Cambiar de repositorio o de rama invalida la copia local: es de otro sitio.
+    if (repo !== settings.repo || branch !== settings.branch) clearCache();
 
     settings = { repo, token, branch };
     saveSettings(settings);

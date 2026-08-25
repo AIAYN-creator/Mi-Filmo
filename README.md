@@ -1,4 +1,12 @@
-<img src="assets/brand/logo.svg" alt="Mi Filmo" height="64">
+<div align="center">
+
+<img src="assets/brand/logo.svg" alt="Mi Filmo" height="76">
+
+# Mi Filmo
+
+**Un diario de cine que vive en tu propio repositorio de GitHub.**
+
+</div>
 
 Diario personal de cine, series y documentales. Sin servidor, sin base de datos y sin cuenta de nada: la app es HTML estático y tus obras viven en un `peliculas.json` dentro de **tu propio repositorio de GitHub**.
 

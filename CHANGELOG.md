@@ -3,6 +3,25 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 Este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
+## [1.2.1] — 2026-08-25
+
+Auditoría del código reorganizado. Seis defectos encontrados y corregidos; ninguno
+afecta al formato de `peliculas.json`.
+
+### Corregido
+
+- Al abrir «Añadir» o «Editar», el foco aterrizaba en el aspa de cerrar en lugar de en el campo de título. En orden de documento el botón de cerrar va antes que el formulario, y el modal enfocaba el primer elemento enfocable sin distinguir.
+- Una valoración que no fuera múltiplo de 0.5 en el JSON (un `3.7` escrito a mano) bloqueaba el guardado al editar esa obra: el `step="0.5"` del formulario la rechazaba con un aviso del navegador fácil de pasar por alto. Ahora se ajusta a la rejilla al cargar.
+- Dos obras con el mismo `id` en el JSON hacían que editar una reescribiera ambas y que borrar una borrara las dos. Los ids duplicados se reasignan al cargar.
+- El recorte de la review a 140 caracteres partía por la mitad los emojis que cayeran justo en el corte y dejaba un símbolo roto. Se recorta por caracteres reales en lugar de por unidades UTF-16.
+- La copia local se guardaba solo bajo el nombre del repositorio: cambiar de rama mostraba el catálogo de la rama anterior hasta que respondía la red. La rama pasa a formar parte de la clave.
+- Recargar y guardar podían solaparse y dejar el estado a merced de cuál respondiera antes. Ahora solo hay una operación de red en vuelo y el botón de recargar se desactiva mientras dura.
+- `og:image` era una ruta relativa a un SVG, así que ningún scraper la resolvía ni la renderizaba. Se añade `assets/brand/social-preview.png` (1200×630) y la etiqueta pasa a URL absoluta, con `og:url` y `twitter:card` de imagen grande.
+
+### Añadido
+
+- Encabezado del README centrado, con el logotipo y el título.
+
 ## [1.2.0] — 2026-08-25
 
 ### Añadido

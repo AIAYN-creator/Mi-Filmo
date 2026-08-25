@@ -10,8 +10,16 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Mi Filmo">
 <meta property="og:description" content="Diario personal de cine, series y documentales. Sin servidor: los datos viven en tu propio repositorio de GitHub.">
-<meta property="og:image" content="assets/brand/logo.svg">
-<meta name="twitter:card" content="summary">
+<!--
+  og:image debe ser absoluta y en un formato que los scrapers rendericen: con una
+  ruta relativa no la resuelven, y el SVG lo ignoran casi todos. Si forkeas el
+  proyecto, cambia el dominio por el de tus Pages.
+-->
+<meta property="og:image" content="https://aiayn-creator.github.io/Mi-Filmo/assets/brand/social-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://aiayn-creator.github.io/Mi-Filmo/">
+<meta name="twitter:card" content="summary_large_image">
 
 <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="site.webmanifest">

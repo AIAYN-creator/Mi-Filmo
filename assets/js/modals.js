@@ -17,8 +17,13 @@ export function openModal(id) {
   modal.classList.add('flex');
   stack.push(id);
 
-  // Primer control enfocable del modal, para no dejar el foco detrás del overlay.
-  const focusable = modal.querySelector('input, select, textarea, button');
+  // Primer campo del formulario, no el primer enfocable: en orden de documento
+  // el botón de cerrar va antes que el formulario, y abrir "Añadir" dejaba el
+  // foco en la aspa en lugar de en el título.
+  const focusable =
+    modal.querySelector('[data-autofocus]') ||
+    modal.querySelector('input:not([type="hidden"]), select, textarea') ||
+    modal.querySelector('button');
   if (focusable) focusable.focus();
 }
 

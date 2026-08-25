@@ -40,8 +40,11 @@ export function chipClass(active) {
 export function cardTemplate(item) {
   const isZero = item.valoracion === 0;
   const tags = tagsHtml(item.etiquetas);
-  const review = item.review.length > REVIEW_PREVIEW_CHARS
-    ? `${item.review.slice(0, REVIEW_PREVIEW_CHARS)}…`
+  // Se recorta por caracteres reales, no por unidades UTF-16: slice() partía por
+  // la mitad los emojis que cayeran justo en el corte y dejaba un símbolo roto.
+  const chars = Array.from(item.review);
+  const review = chars.length > REVIEW_PREVIEW_CHARS
+    ? `${chars.slice(0, REVIEW_PREVIEW_CHARS).join('')}…`
     : item.review;
 
   return `

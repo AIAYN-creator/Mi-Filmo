@@ -58,12 +58,15 @@ export function saveSettings({ repo, token, branch }) {
  * Devuelve null si no hay copia o si pertenece a otro repositorio, para que
  * cambiar de repo nunca muestre las obras del anterior.
  */
-export function readCache(repo) {
+export function readCache(repo, branch) {
   const raw = safeGet(STORAGE_KEYS.cache);
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
-    if (!parsed || parsed.repo !== repo || !Array.isArray(parsed.items)) return null;
+    // La rama forma parte de la identidad del catálogo: dos ramas del mismo
+    // repositorio tienen contenidos distintos y no pueden compartir copia.
+    if (!parsed || parsed.repo !== repo || parsed.branch !== branch) return null;
+    if (!Array.isArray(parsed.items)) return null;
     return parsed;
   } catch {
     return null;
@@ -71,8 +74,8 @@ export function readCache(repo) {
 }
 
 /** Guarda una copia local del catálogo, fechada, para poder abrir la app sin red. */
-export function writeCache(repo, items) {
-  safeSet(STORAGE_KEYS.cache, JSON.stringify({ repo, items, savedAt: Date.now() }));
+export function writeCache(repo, branch, items) {
+  safeSet(STORAGE_KEYS.cache, JSON.stringify({ repo, branch, items, savedAt: Date.now() }));
 }
 
 export function clearCache() {

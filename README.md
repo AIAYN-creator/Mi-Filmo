@@ -2,8 +2,6 @@
 
 <img src="assets/brand/logo.svg" alt="Mi Filmo" height="76">
 
-# Mi Filmo
-
 **Un diario de cine que vive en tu propio repositorio de GitHub.**
 
 </div>

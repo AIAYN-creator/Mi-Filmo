@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mi Filmo">
+  <rect width="64" height="64" rx="14" fill="#1a1210"/>
+  <rect x="3" y="3" width="58" height="58" rx="12" fill="none" stroke="#4a2e28" stroke-width="2"/>
+  <polygon fill="#d1a355" points="32,10 37.52,24.4 52.92,25.2 40.94,34.9 44.93,49.8 32,41.4 19.07,49.8 23.06,34.9 11.08,25.2 26.48,24.4"/>
+</svg>

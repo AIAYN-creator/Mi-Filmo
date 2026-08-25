@@ -4,9 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mi Filmo</title>
+<meta name="description" content="Diario personal de cine, series y documentales. Sin servidor: los datos viven en tu propio repositorio de GitHub.">
+<meta name="theme-color" content="#1a1210">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Mi Filmo">
+<meta property="og:description" content="Diario personal de cine, series y documentales. Sin servidor: los datos viven en tu propio repositorio de GitHub.">
+<meta property="og:image" content="assets/icons/favicon.svg">
+<meta name="twitter:card" content="summary">
+
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="site.webmanifest">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
+
+<!--
+  Dependencias externas ancladas a una versión concreta. Sin el pin, cualquier
+  publicación futura de estos paquetes se ejecutaría en la página con acceso al
+  token de GitHub guardado en localStorage.
+
+  Tailwind va sin integrity porque cdn.tailwindcss.com no envía cabeceras CORS
+  y el navegador rechazaría el script; el anclaje de versión es la protección
+  que sí se puede aplicar aquí. Lucide sí lleva SRI (ver README).
+-->
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -30,13 +53,11 @@
     }
   }
 </script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<style>
-  body{ background: #1a1210; }
-  ::-webkit-scrollbar{ width:10px; height:10px; }
-  ::-webkit-scrollbar-track{ background:#1a1210; }
-  ::-webkit-scrollbar-thumb{ background:#4a2e28; border-radius:6px; }
-</style>
+<script src="https://unpkg.com/lucide@1.34.0/dist/umd/lucide.min.js"
+        integrity="sha384-TkyaYJPudUfB9a60ZTQjPXXxBGDxeXJy48PDE1DeZnOdKs/QdAs3pP/B9ApNJIH8"
+        crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body class="bg-brand-bg text-brand-text font-sans min-h-screen pb-16">
 
@@ -61,8 +82,16 @@
   </div>
 </header>
 
+<noscript>
+  <div class="max-w-6xl mx-auto px-4 mt-4">
+    <p class="text-sm bg-brand-bgsoft border border-brand-red rounded-lg px-3 py-2">
+      Mi Filmo necesita JavaScript para leer el catálogo desde GitHub.
+    </p>
+  </div>
+</noscript>
+
 <div class="max-w-6xl mx-auto px-4 mt-4">
-  <div id="syncBanner" class="flex items-center gap-2 text-xs text-brand-textdim bg-brand-bgsoft border border-brand-line rounded-lg px-3 py-2">
+  <div id="syncBanner" role="status" aria-live="polite" class="flex items-center gap-2 text-xs text-brand-textdim bg-brand-bgsoft border border-brand-line rounded-lg px-3 py-2">
     <i data-lucide="info" class="w-3.5 h-3.5 shrink-0"></i>
     <span>Cargando...</span>
   </div>
@@ -72,7 +101,8 @@
   <div class="flex flex-col gap-4 mb-6">
     <div class="relative">
       <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-brand-textdim"></i>
-      <input id="searchInput" type="text" placeholder="Buscar por título o director..."
+      <label for="searchInput" class="sr-only">Buscar</label>
+      <input id="searchInput" type="search" placeholder="Buscar por título o director..."
         class="w-full bg-brand-bgsoft border border-brand-line rounded-lg pl-9 pr-3 py-2.5 text-sm text-brand-text placeholder-brand-textdim focus:outline-none focus:border-brand-gold transition">
     </div>
 
@@ -91,12 +121,12 @@
   <p id="emptyState" class="hidden text-center text-brand-textdim py-16">No hay ninguna obra que cumpla estos filtros.</p>
 </main>
 
-<!-- Modal: Añadir Nueva Obra -->
-<div id="addModal" class="hidden fixed inset-0 z-40 items-center justify-center p-4 bg-black/70">
+<!-- Modal: alta y edición (comparten formulario) -->
+<div id="addModal" data-modal class="hidden fixed inset-0 z-40 items-center justify-center p-4 bg-black/70" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
   <div class="bg-brand-bgsoft border border-brand-line rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
     <div class="flex items-center justify-between px-5 py-4 border-b border-brand-line">
       <h2 id="addModalTitle" class="font-display text-xl tracking-wide text-brand-gold">Añadir Nueva Obra</h2>
-      <button type="button" data-close-modal="addModal" class="text-brand-textdim hover:text-brand-text">
+      <button type="button" data-close-modal="addModal" aria-label="Cerrar" class="text-brand-textdim hover:text-brand-text">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
     </div>
@@ -115,14 +145,8 @@
 
       <label class="text-xs text-brand-textdim">
         Tipo
-        <select id="tipoSelect" name="tipo" class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-gold transition">
-          <option value="Película">Película</option>
-          <option value="Serie">Serie</option>
-          <option value="Documental">Documental</option>
-          <option value="Cortometraje">Cortometraje</option>
-          <option value="Ensayo Audiovisual">Ensayo Audiovisual</option>
-          <option value="Otro">Otro</option>
-        </select>
+        <!-- Las opciones se generan desde TIPOS en config.js -->
+        <select id="tipoSelect" name="tipo" class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-gold transition"></select>
       </label>
 
       <label class="text-xs text-brand-textdim">
@@ -149,20 +173,20 @@
           class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-gold transition">
       </label>
 
-      <button id="addSubmitBtn" type="submit" class="mt-2 bg-brand-red hover:bg-brand-red/90 text-white rounded-lg py-2.5 text-sm font-semibold transition">Guardar</button>
+      <button id="addSubmitBtn" type="submit" class="mt-2 bg-brand-red hover:bg-brand-red/90 text-white rounded-lg py-2.5 text-sm font-semibold transition disabled:opacity-60">Guardar</button>
     </form>
   </div>
 </div>
 
-<!-- Modal: Detalle de Obra -->
-<div id="detailModal" class="hidden fixed inset-0 z-40 items-center justify-center p-4 bg-black/70">
+<!-- Modal: detalle de obra -->
+<div id="detailModal" data-modal class="hidden fixed inset-0 z-40 items-center justify-center p-4 bg-black/70" role="dialog" aria-modal="true" aria-labelledby="detailTitulo">
   <div class="bg-brand-bgsoft border border-brand-line rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between px-5 py-4 border-b border-brand-line gap-3">
       <div>
         <h2 id="detailTitulo" class="font-display text-2xl tracking-wide text-brand-gold leading-tight"></h2>
         <p id="detailDirector" class="text-sm text-brand-textdim mt-0.5"></p>
       </div>
-      <button type="button" data-close-modal="detailModal" class="text-brand-textdim hover:text-brand-text shrink-0">
+      <button type="button" data-close-modal="detailModal" aria-label="Cerrar" class="text-brand-textdim hover:text-brand-text shrink-0">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
     </div>
@@ -189,7 +213,7 @@
         <button id="detailEditBtn" type="button" class="flex-1 flex items-center justify-center gap-1.5 border border-brand-line hover:border-brand-gold text-brand-text rounded-lg py-2 text-sm font-semibold transition">
           <i data-lucide="pencil" class="w-4 h-4"></i> Editar
         </button>
-        <button id="detailDeleteBtn" type="button" class="flex-1 flex items-center justify-center gap-1.5 border border-brand-red text-brand-red hover:bg-brand-red hover:text-white rounded-lg py-2 text-sm font-semibold transition">
+        <button id="detailDeleteBtn" type="button" class="flex-1 flex items-center justify-center gap-1.5 border border-brand-red text-brand-red hover:bg-brand-red hover:text-white rounded-lg py-2 text-sm font-semibold transition disabled:opacity-60">
           <i data-lucide="trash-2" class="w-4 h-4"></i> Eliminar
         </button>
       </div>
@@ -197,19 +221,24 @@
   </div>
 </div>
 
-<!-- Modal: Configuración -->
-<div id="settingsModal" class="hidden fixed inset-0 z-40 items-center justify-center p-4 bg-black/70">
-  <div class="bg-brand-bgsoft border border-brand-line rounded-xl w-full max-w-md">
+<!-- Modal: configuración de la conexión con GitHub -->
+<div id="settingsModal" data-modal class="hidden fixed inset-0 z-40 items-center justify-center p-4 bg-black/70" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="bg-brand-bgsoft border border-brand-line rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
     <div class="flex items-center justify-between px-5 py-4 border-b border-brand-line">
-      <h2 class="font-display text-xl tracking-wide text-brand-gold">Configuración</h2>
-      <button type="button" data-close-modal="settingsModal" class="text-brand-textdim hover:text-brand-text">
+      <h2 id="settingsTitle" class="font-display text-xl tracking-wide text-brand-gold">Configuración</h2>
+      <button type="button" data-close-modal="settingsModal" aria-label="Cerrar" class="text-brand-textdim hover:text-brand-text">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
     </div>
     <form id="settingsForm" class="px-5 py-4 flex flex-col gap-3">
       <label class="text-xs text-brand-textdim">
         Repositorio (usuario/repo)
-        <input id="repoInput" type="text" placeholder="tuusuario/audiovisual"
+        <input id="repoInput" type="text" placeholder="tuusuario/mi-filmo" autocomplete="off"
+          class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text placeholder-brand-textdim focus:outline-none focus:border-brand-gold transition">
+      </label>
+      <label class="text-xs text-brand-textdim">
+        Rama
+        <input id="branchInput" type="text" placeholder="main" autocomplete="off"
           class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text placeholder-brand-textdim focus:outline-none focus:border-brand-gold transition">
       </label>
       <label class="text-xs text-brand-textdim">
@@ -218,503 +247,14 @@
           class="mt-1 w-full bg-brand-bg border border-brand-line rounded-lg px-3 py-2 text-sm text-brand-text placeholder-brand-textdim focus:outline-none focus:border-brand-gold transition">
       </label>
       <p class="text-[0.7rem] text-brand-textdim leading-relaxed">
-        El token se guarda solo en este navegador (localStorage) y solo se usa para hablar directamente con la API de GitHub. Usa un token <em>fine-grained</em> limitado a este repositorio, con permiso "Contents: Read and write" únicamente.
+        El token se guarda solo en este navegador (localStorage) y solo se envía a la API de GitHub. Usa un token <em>fine-grained</em> limitado a este repositorio, con permiso "Contents: Read and write" únicamente. Sin token la app funciona en modo lectura si el repositorio es público.
       </p>
       <button type="submit" class="mt-2 bg-brand-red hover:bg-brand-red/90 text-white rounded-lg py-2.5 text-sm font-semibold transition">Guardar configuración</button>
     </form>
   </div>
 </div>
 
-<script>
-  const TIPOS = ['Película', 'Serie', 'Documental', 'Cortometraje', 'Ensayo Audiovisual', 'Otro'];
-
-  // --- fallback cuando no hay repositorio configurado ---
-  const DEFAULT_MOCK_ITEMS = [
-    {
-      id: "rev-001",
-      titulo: "Stalker",
-      director: "Andrei Tarkovsky",
-      tipo: "Película",
-      valoracion: 5,
-      etiquetas: ["Fotografía", "Obra Maestra", "Filosofía"],
-      review: "Una atmósfera insuperable. Cada plano es una pintura en sí mismo.",
-      fechaVisionado: "2026-07-28"
-    },
-    {
-      id: "rev-002",
-      titulo: "Bodrio Espacial 3",
-      director: "Anónimo",
-      tipo: "Película",
-      valoracion: 0,
-      etiquetas: ["Guion nefasto", "Pérdida de tiempo"],
-      review: "0 estrellas bien merecidas. Infumable.",
-      fechaVisionado: "2026-07-30"
-    }
-  ];
-
-  let items = DEFAULT_MOCK_ITEMS.slice();
-
-  // --- estado de sincronización con GitHub ---
-  let repo = localStorage.getItem('miFilmo_repo') || '';
-  let token = localStorage.getItem('miFilmo_token') || '';
-  let currentSha = null;
-
-  const state = { search: '', tipo: 'Todas', rating: 'Todas' };
-
-  function esc(str){
-    return String(str ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
-  }
-
-  function utf8ToBase64(str){
-    const bytes = new TextEncoder().encode(str);
-    let binary = '';
-    bytes.forEach(b => { binary += String.fromCharCode(b); });
-    return btoa(binary);
-  }
-
-  function base64ToUtf8(b64){
-    const binary = atob(b64);
-    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
-    return new TextDecoder().decode(bytes);
-  }
-
-  function normalizeRepo(value){
-    return value.trim()
-      .replace(/^https?:\/\/github\.com\//i, '')
-      .replace(/\.git$/i, '')
-      .replace(/\/+$/, '');
-  }
-
-  function githubHeaders(){
-    const h = { 'Accept': 'application/vnd.github+json' };
-    if (token) h['Authorization'] = `Bearer ${token}`;
-    return h;
-  }
-
-  function setSyncStatus(kind, text){
-    const el = document.getElementById('syncBanner');
-    const icon = { local: 'info', loading: 'loader-2', ok: 'check-circle-2', error: 'alert-triangle' }[kind] || 'info';
-    const color = {
-      local: 'text-brand-textdim border-brand-line',
-      loading: 'text-brand-gold border-brand-line',
-      ok: 'text-brand-gold border-brand-gold/40',
-      error: 'text-brand-red border-brand-red/50'
-    }[kind] || 'text-brand-textdim border-brand-line';
-    el.className = `flex items-center gap-2 text-xs bg-brand-bgsoft border rounded-lg px-3 py-2 ${color}`;
-    el.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5 shrink-0 ${kind === 'loading' ? 'animate-spin' : ''}"></i><span>${esc(text)}</span>`;
-    if (window.lucide) lucide.createIcons();
-  }
-
-  // Recarga items/sha desde GitHub sin tocar el banner de estado (lo gestiona cada llamante).
-  async function fetchLatestFromGitHub(){
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/peliculas.json`, { headers: githubHeaders() });
-    if (res.status === 404){
-      currentSha = null;
-      items = [];
-      return 'empty';
-    }
-    if (!res.ok) throw new Error(`GET ${res.status}`);
-    const data = await res.json();
-    currentSha = data.sha;
-    items = JSON.parse(base64ToUtf8(data.content));
-    return 'ok';
-  }
-
-  async function loadFromGitHub(){
-    if (!repo){
-      currentSha = null;
-      items = DEFAULT_MOCK_ITEMS.slice();
-      setSyncStatus('local', 'Modo local: configura tu repositorio en Configuración para sincronizar con GitHub.');
-      render();
-      return;
-    }
-    setSyncStatus('loading', 'Cargando catálogo desde GitHub...');
-    try {
-      const result = await fetchLatestFromGitHub();
-      setSyncStatus('ok', result === 'empty'
-        ? `Conectado a ${repo} — peliculas.json se creará al añadir la primera obra.`
-        : `Sincronizado con ${repo}`);
-    } catch (err){
-      setSyncStatus('error', `No se pudo cargar peliculas.json de ${repo}. Mostrando el último catálogo disponible.`);
-    }
-    render();
-  }
-
-  async function writeToGitHub(newItems, message){
-    if (!repo){
-      setSyncStatus('local', 'Configura tu repositorio en Configuración para poder guardar cambios en GitHub.');
-      openModal('settingsModal');
-      return false;
-    }
-    if (!token){
-      setSyncStatus('error', 'Falta el token de GitHub. Añádelo en Configuración para guardar cambios.');
-      openModal('settingsModal');
-      return false;
-    }
-    setSyncStatus('loading', 'Guardando en GitHub...');
-    try {
-      const body = {
-        message: `Mi Filmo: ${message}`,
-        content: utf8ToBase64(JSON.stringify(newItems, null, 2) + '\n'),
-        branch: 'main'
-      };
-      if (currentSha) body.sha = currentSha;
-
-      const res = await fetch(`https://api.github.com/repos/${repo}/contents/peliculas.json`, {
-        method: 'PUT',
-        headers: { ...githubHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      if (res.status === 409){
-        try { await fetchLatestFromGitHub(); } catch (err) { /* si tampoco se puede recargar, se mantiene el estado anterior */ }
-        setSyncStatus('error', 'El catálogo cambió en GitHub mientras editabas. Se ha recargado la versión más reciente — vuelve a intentar el cambio.');
-        render();
-        return false;
-      }
-      if (!res.ok){
-        const errBody = await res.json().catch(() => ({}));
-        setSyncStatus('error', `Error al guardar en GitHub (${res.status}): ${errBody.message || 'inténtalo de nuevo'}`);
-        return false;
-      }
-
-      const resData = await res.json();
-      currentSha = resData.content.sha;
-      items = newItems;
-      setSyncStatus('ok', `Sincronizado con ${repo}`);
-      render();
-      return true;
-    } catch (err){
-      setSyncStatus('error', 'No se pudo conectar con GitHub. Comprueba tu conexión e inténtalo de nuevo.');
-      return false;
-    }
-  }
-
-  function formatDate(str){
-    if (!str) return 'Sin fecha';
-    const d = new Date(str + 'T00:00:00');
-    if (isNaN(d)) return str;
-    return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
-
-  function starsHtml(rating){
-    const pct = Math.max(0, Math.min(100, (rating / 5) * 100));
-    return `
-      <div class="relative inline-block leading-none text-brand-line" style="font-size:1.05rem; letter-spacing:2px;">
-        <span>★★★★★</span>
-        <span class="absolute inset-0 overflow-hidden text-brand-gold" style="width:${pct}%">★★★★★</span>
-      </div>`;
-  }
-
-  function cardTemplate(it){
-    const isZero = it.valoracion === 0;
-    const tags = (it.etiquetas || []).map(t =>
-      `<span class="text-[0.7rem] px-2 py-0.5 rounded-full bg-brand-bg border border-brand-line text-brand-gold">${esc(t)}</span>`
-    ).join('');
-
-    const rawReview = it.review || '';
-    const truncatedRaw = rawReview.length > 140 ? rawReview.slice(0, 140) + '…' : rawReview;
-
-    return `
-    <article data-id="${esc(it.id)}" tabindex="0" role="button" aria-label="Ver detalles de ${esc(it.titulo)}" class="bg-brand-bgsoft border ${isZero ? 'border-brand-red/70 ring-1 ring-brand-red/40' : 'border-brand-line'} rounded-xl p-4 flex flex-col gap-3 hover:border-brand-gold/60 transition cursor-pointer">
-      <div class="flex items-start justify-between gap-2">
-        <div>
-          <h3 class="font-display text-lg tracking-wide text-brand-text leading-tight">${esc(it.titulo)}</h3>
-          <p class="text-sm text-brand-textdim">${esc(it.director) || 'Director/a desconocido/a'}</p>
-        </div>
-        <span class="shrink-0 text-[0.7rem] px-2 py-1 rounded-md bg-brand-bg border border-brand-line text-brand-textdim whitespace-nowrap">${esc(it.tipo)}</span>
-      </div>
-
-      <div class="flex items-center gap-2">
-        ${starsHtml(it.valoracion)}
-        <span class="text-xs font-semibold ${isZero ? 'text-brand-red' : 'text-brand-textdim'}">${Number(it.valoracion).toFixed(1)}</span>
-        ${isZero ? '<span class="text-[0.65rem] uppercase tracking-wide text-brand-red font-bold ml-1">Para el olvido</span>' : ''}
-      </div>
-
-      ${tags ? `<div class="flex flex-wrap gap-1.5">${tags}</div>` : ''}
-
-      <p class="text-sm text-brand-textdim leading-relaxed">${esc(truncatedRaw)}</p>
-
-      <div class="flex items-center gap-1.5 text-xs text-brand-textdim mt-auto pt-2 border-t border-brand-line">
-        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-        <span>${formatDate(it.fechaVisionado)}</span>
-      </div>
-    </article>`;
-  }
-
-  function chipClass(active){
-    return `px-3 py-1.5 rounded-full text-xs border transition whitespace-nowrap ${
-      active
-        ? 'bg-brand-red border-brand-red text-white font-semibold'
-        : 'bg-brand-bgsoft border-brand-line text-brand-textdim hover:border-brand-gold'
-    }`;
-  }
-
-  function render(){
-    const grid = document.getElementById('grid');
-    const empty = document.getElementById('emptyState');
-    const term = state.search.trim().toLowerCase();
-
-    const filtered = items.filter(it => {
-      if (term && !(it.titulo.toLowerCase().includes(term) || (it.director || '').toLowerCase().includes(term))) return false;
-      if (state.tipo !== 'Todas' && it.tipo !== state.tipo) return false;
-      if (state.rating !== 'Todas'){
-        const bucket = Math.min(5, Math.floor(it.valoracion));
-        if (String(bucket) !== state.rating) return false;
-      }
-      return true;
-    });
-
-    grid.innerHTML = '';
-    empty.classList.toggle('hidden', filtered.length > 0);
-
-    filtered
-      .slice()
-      .sort((a, b) => (b.fechaVisionado || '').localeCompare(a.fechaVisionado || ''))
-      .forEach(it => grid.insertAdjacentHTML('beforeend', cardTemplate(it)));
-
-    document.getElementById('countLabel').textContent =
-      `${items.length} obra${items.length === 1 ? '' : 's'} registrada${items.length === 1 ? '' : 's'}`;
-
-    if (window.lucide) lucide.createIcons();
-  }
-
-  // --- filtros ---
-  const tipoFiltersEl = document.getElementById('tipoFilters');
-  ['Todas', ...TIPOS].forEach(t => {
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.textContent = t;
-    chip.dataset.tipo = t;
-    chip.className = chipClass(t === 'Todas');
-    chip.addEventListener('click', () => {
-      state.tipo = t;
-      document.querySelectorAll('#tipoFilters button').forEach(b => b.className = chipClass(b.dataset.tipo === state.tipo));
-      render();
-    });
-    tipoFiltersEl.appendChild(chip);
-  });
-
-  const ratingFiltersEl = document.getElementById('ratingFilters');
-  ['Todas', '0', '1', '2', '3', '4', '5'].forEach(r => {
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.textContent = r === 'Todas' ? 'Todas' : `${r}★`;
-    chip.dataset.rating = r;
-    chip.className = chipClass(r === 'Todas');
-    chip.addEventListener('click', () => {
-      state.rating = r;
-      document.querySelectorAll('#ratingFilters button').forEach(b => b.className = chipClass(b.dataset.rating === state.rating));
-      render();
-    });
-    ratingFiltersEl.appendChild(chip);
-  });
-
-  document.getElementById('searchInput').addEventListener('input', e => {
-    state.search = e.target.value;
-    render();
-  });
-
-  // --- detalle de obra ---
-  let detailItemId = null;
-
-  function openDetail(item){
-    detailItemId = item.id;
-    document.getElementById('detailTitulo').textContent = item.titulo;
-    document.getElementById('detailDirector').textContent = item.director || 'Director/a desconocido/a';
-    document.getElementById('detailTipo').textContent = item.tipo;
-    document.getElementById('detailStars').innerHTML = starsHtml(item.valoracion);
-    document.getElementById('detailValoracion').textContent = Number(item.valoracion).toFixed(1);
-    document.getElementById('detailValoracion').className = `text-sm font-semibold ${item.valoracion === 0 ? 'text-brand-red' : 'text-brand-textdim'}`;
-
-    const zeroBadge = document.getElementById('detailZeroBadge');
-    zeroBadge.textContent = 'Para el olvido';
-    zeroBadge.classList.toggle('hidden', item.valoracion !== 0);
-
-    const tagsEl = document.getElementById('detailTags');
-    tagsEl.innerHTML = (item.etiquetas || []).map(t =>
-      `<span class="text-[0.7rem] px-2 py-0.5 rounded-full bg-brand-bg border border-brand-line text-brand-gold">${esc(t)}</span>`
-    ).join('');
-
-    document.getElementById('detailReview').textContent = item.review || 'Sin review todavía.';
-    document.getElementById('detailFecha').textContent = formatDate(item.fechaVisionado);
-
-    openModal('detailModal');
-    if (window.lucide) lucide.createIcons();
-  }
-
-  document.getElementById('grid').addEventListener('click', e => {
-    const article = e.target.closest('[data-id]');
-    if (!article) return;
-    const item = items.find(x => x.id === article.dataset.id);
-    if (item) openDetail(item);
-  });
-
-  document.getElementById('grid').addEventListener('keydown', e => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    const article = e.target.closest('[data-id]');
-    if (!article) return;
-    e.preventDefault();
-    const item = items.find(x => x.id === article.dataset.id);
-    if (item) openDetail(item);
-  });
-
-  // --- modales ---
-  function openModal(id){
-    const modal = document.getElementById(id);
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
-  function closeModal(id){
-    const modal = document.getElementById(id);
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
-
-  // --- alta / edición de obra (comparten el mismo modal y formulario) ---
-  let editingId = null;
-
-  function openAddModal(item){
-    editingId = item ? item.id : null;
-    document.getElementById('addForm').reset();
-
-    document.getElementById('addModalTitle').textContent = item ? 'Editar Obra' : 'Añadir Nueva Obra';
-    document.getElementById('addSubmitBtn').textContent = item ? 'Guardar cambios' : 'Guardar';
-
-    document.getElementById('tituloInput').value = item ? item.titulo : '';
-    document.getElementById('directorInput').value = item ? (item.director || '') : '';
-    document.getElementById('tipoSelect').value = item ? item.tipo : 'Película';
-    document.getElementById('valoracionInput').value = item ? item.valoracion : 0;
-    document.getElementById('etiquetasInput').value = item ? (item.etiquetas || []).join(', ') : '';
-    document.getElementById('reviewInput').value = item ? (item.review || '') : '';
-    document.getElementById('fechaVisionadoInput').value = item ? item.fechaVisionado : new Date().toISOString().slice(0, 10);
-
-    openModal('addModal');
-  }
-
-  document.getElementById('addBtn').addEventListener('click', () => openAddModal(null));
-
-  document.getElementById('detailEditBtn').addEventListener('click', () => {
-    const item = items.find(x => x.id === detailItemId);
-    if (!item) return;
-    closeModal('detailModal');
-    openAddModal(item);
-  });
-
-  document.getElementById('detailDeleteBtn').addEventListener('click', async () => {
-    const item = items.find(x => x.id === detailItemId);
-    if (!item) return;
-    const ok = confirm(`¿Seguro que quieres eliminar "${item.titulo}"? Esta acción no se puede deshacer.`);
-    if (!ok) return;
-
-    const newItems = items.filter(x => x.id !== item.id);
-
-    if (!repo){
-      items = newItems;
-      closeModal('detailModal');
-      render();
-      return;
-    }
-
-    const btn = document.getElementById('detailDeleteBtn');
-    btn.disabled = true;
-    const success = await writeToGitHub(newItems, `Eliminar "${item.titulo}"`);
-    btn.disabled = false;
-    if (success) closeModal('detailModal');
-  });
-
-  document.getElementById('refreshBtn').addEventListener('click', () => loadFromGitHub());
-
-  document.getElementById('settingsBtn').addEventListener('click', () => {
-    document.getElementById('repoInput').value = repo;
-    document.getElementById('tokenInput').value = token;
-    openModal('settingsModal');
-  });
-
-  document.querySelectorAll('[data-close-modal]').forEach(btn => {
-    btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
-  });
-
-  ['addModal', 'settingsModal', 'detailModal'].forEach(id => {
-    const modal = document.getElementById(id);
-    modal.addEventListener('click', e => { if (e.target === modal) closeModal(id); });
-  });
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape'){ closeModal('addModal'); closeModal('settingsModal'); closeModal('detailModal'); }
-  });
-
-  function setFormBusy(busy){
-    const btn = document.getElementById('addSubmitBtn');
-    btn.disabled = busy;
-    btn.dataset.label = btn.dataset.label || btn.textContent;
-    btn.textContent = busy ? 'Guardando...' : btn.dataset.label;
-  }
-
-  // --- guardar alta o edición ---
-  document.getElementById('addForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    const titulo = fd.get('titulo').trim();
-    if (!titulo) return;
-
-    const data = {
-      titulo,
-      director: fd.get('director').trim(),
-      tipo: fd.get('tipo'),
-      valoracion: Number(fd.get('valoracion')),
-      etiquetas: fd.get('etiquetas').split(',').map(s => s.trim()).filter(Boolean),
-      review: fd.get('review').trim(),
-      fechaVisionado: fd.get('fechaVisionado')
-    };
-
-    const newItems = editingId
-      ? items.map(x => x.id === editingId ? { ...x, ...data } : x)
-      : [{ id: crypto.randomUUID(), ...data }, ...items];
-
-    if (!repo){
-      items = newItems;
-      editingId = null;
-      e.target.reset();
-      closeModal('addModal');
-      render();
-      return;
-    }
-
-    setFormBusy(true);
-    const success = await writeToGitHub(newItems, editingId ? `Editar "${titulo}"` : `Añadir "${titulo}"`);
-    setFormBusy(false);
-
-    if (success){
-      editingId = null;
-      e.target.reset();
-      closeModal('addModal');
-    }
-  });
-
-  // --- configuración (PAT + repo, solo en localStorage de este navegador) ---
-  document.getElementById('settingsForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const rawRepo = document.getElementById('repoInput').value.trim();
-    const newRepo = rawRepo ? normalizeRepo(rawRepo) : '';
-    const newToken = document.getElementById('tokenInput').value.trim();
-
-    if (newRepo && !/^[\w.-]+\/[\w.-]+$/.test(newRepo)){
-      alert('Formato de repositorio no válido. Usa "usuario/repositorio".');
-      return;
-    }
-
-    if (newRepo) localStorage.setItem('miFilmo_repo', newRepo); else localStorage.removeItem('miFilmo_repo');
-    if (newToken) localStorage.setItem('miFilmo_token', newToken); else localStorage.removeItem('miFilmo_token');
-
-    repo = newRepo;
-    token = newToken;
-    closeModal('settingsModal');
-    await loadFromGitHub();
-  });
-
-  loadFromGitHub();
-</script>
+<script type="module" src="assets/js/app.js"></script>
 
 </body>
 </html>

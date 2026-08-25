@@ -1,0 +1,74 @@
+/*
+ * Estilos propios de Mi Filmo.
+ * Todo lo demás son utilidades de Tailwind aplicadas en el HTML; aquí solo
+ * vive lo que Tailwind no cubre bien: el fondo base, la barra de scroll y las
+ * estrellas de valoración.
+ */
+
+body {
+  background: #1a1210;
+}
+
+/* --- barra de scroll (WebKit / Chromium) --- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1210;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4a2e28;
+  border-radius: 6px;
+}
+
+/* --- valoración --- */
+
+/*
+ * Cinco estrellas grises con una capa dorada superpuesta y recortada por
+ * porcentaje: así un 3.5 muestra media estrella real sin dibujar glifos
+ * intermedios ni depender de iconos partidos.
+ */
+.stars {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  font-size: 1.05rem;
+  letter-spacing: 2px;
+  color: #4a2e28;
+  white-space: nowrap;
+}
+
+.stars__fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #d1a355;
+}
+
+/* --- accesibilidad --- */
+
+/* Visible solo para lectores de pantalla. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

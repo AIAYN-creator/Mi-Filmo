@@ -1,0 +1,26 @@
+{
+  "name": "Mi Filmo",
+  "short_name": "Mi Filmo",
+  "description": "Diario personal de cine, series y documentales, con GitHub como backend.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1a1210",
+  "theme_color": "#1a1210",
+  "icons": [
+    {
+      "src": "assets/icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

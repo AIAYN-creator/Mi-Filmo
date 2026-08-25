@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mi Filmo">
+  <!-- Icono maskable: fondo a sangre y marca dentro del 80% seguro que recortan los lanzadores. -->
+  <rect width="64" height="64" fill="#1a1210"/>
+  <g transform="translate(32 32) scale(0.62) translate(-32 -32)">
+    <polygon fill="#d1a355" points="32,10 37.52,24.4 52.92,25.2 40.94,34.9 44.93,49.8 32,41.4 19.07,49.8 23.06,34.9 11.08,25.2 26.48,24.4"/>
+  </g>
+</svg>

@@ -3,6 +3,19 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 Este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
+## [1.2.0] — 2026-08-25
+
+### Añadido
+
+- Identidad de marca en `assets/brand/`: isotipo de fotograma y estrella, y logotipo horizontal en variantes para fondo oscuro, fondo claro y una tinta. Las letras son trazados, así que los archivos no dependen de tener Bebas Neue instalada.
+- Sección «Marca» en el README con la paleta, las tipografías y el uso de cada archivo.
+- Roadmap dividido en v2 y v3. La v2 incorpora la traducción al inglés; la v3 recoge el ejecutable de escritorio y la app móvil.
+
+### Cambiado
+
+- El favicon pasa a ser una versión simplificada del isotipo, sin perforaciones ni borde interior y con la estrella más grande: a 16 píxeles el detalle se dentaba. El isotipo completo queda para 32 píxeles en adelante.
+- El icono maskable y `og:image` adoptan la marca nueva.
+
 ## [1.1.0] — 2026-08-25
 
 Reorganización del proyecto y corrección de los defectos detectados en la v1.

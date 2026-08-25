@@ -1,5 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mi Filmo">
+  <!--
+    Versión simplificada del isotipo para la pestaña del navegador.
+    A 16px las perforaciones del fotograma se dentan y el borde interior
+    añade ruido, así que aquí los raíles van macizos y la estrella crece.
+    La marca con todo el detalle está en assets/brand/isotipo.svg.
+  -->
   <rect width="64" height="64" rx="14" fill="#1a1210"/>
-  <rect x="3" y="3" width="58" height="58" rx="12" fill="none" stroke="#4a2e28" stroke-width="2"/>
-  <polygon fill="#d1a355" points="32,10 37.52,24.4 52.92,25.2 40.94,34.9 44.93,49.8 32,41.4 19.07,49.8 23.06,34.9 11.08,25.2 26.48,24.4"/>
+  <rect x="4" y="10" width="7" height="44" rx="2" fill="#b3312c"/>
+  <rect x="53" y="10" width="7" height="44" rx="2" fill="#b3312c"/>
+  <polygon fill="#d1a355" points="32,12 37.06,25.04 51.02,25.82 40.18,34.66 43.76,48.18 32,40.60 20.24,48.18 23.82,34.66 12.98,25.82 26.94,25.04"/>
 </svg>

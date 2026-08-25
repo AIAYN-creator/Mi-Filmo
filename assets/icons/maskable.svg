@@ -2,6 +2,18 @@
   <!-- Icono maskable: fondo a sangre y marca dentro del 80% seguro que recortan los lanzadores. -->
   <rect width="64" height="64" fill="#1a1210"/>
   <g transform="translate(32 32) scale(0.62) translate(-32 -32)">
-    <polygon fill="#d1a355" points="32,10 37.52,24.4 52.92,25.2 40.94,34.9 44.93,49.8 32,41.4 19.07,49.8 23.06,34.9 11.08,25.2 26.48,24.4"/>
+    <rect x="5" y="8" width="9" height="48" rx="2" fill="#b3312c"/>
+    <rect x="7" y="12" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="7" y="23" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="7" y="34" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="7" y="45" width="5" height="6" rx="1.5" fill="#1a1210"/>
+
+    <rect x="50" y="8" width="9" height="48" rx="2" fill="#b3312c"/>
+    <rect x="52" y="12" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="52" y="23" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="52" y="34" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="52" y="45" width="5" height="6" rx="1.5" fill="#1a1210"/>
+
+    <polygon fill="#d1a355" points="32,16 36.06,26.42 47.22,27.06 38.56,34.13 41.40,44.94 32,38.90 22.60,44.94 25.44,34.13 16.78,27.06 27.94,26.42"/>
   </g>
 </svg>

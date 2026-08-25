@@ -1,4 +1,4 @@
-# Mi Filmo
+<img src="assets/brand/logo.svg" alt="Mi Filmo" height="64">
 
 Diario personal de cine, series y documentales. Sin servidor, sin base de datos y sin cuenta de nada: la app es HTML estático y tus obras viven en un `peliculas.json` dentro de **tu propio repositorio de GitHub**.
 
@@ -14,9 +14,10 @@ Eso significa que puedes abrirla desde el móvil, el portátil o el ordenador de
 - [Usarla desde varios dispositivos](#usarla-desde-varios-dispositivos)
 - [Modelo de datos](#modelo-de-datos)
 - [Desarrollo local](#desarrollo-local)
+- [Marca](#marca)
 - [Decisiones y límites conocidos](#decisiones-y-límites-conocidos)
 - [Actualizar las dependencias ancladas](#actualizar-las-dependencias-ancladas)
-- [Roadmap: qué se reserva para la v2](#roadmap-qué-se-reserva-para-la-v2)
+- [Roadmap](#roadmap)
 - [Licencia](#licencia)
 
 ---
@@ -208,6 +209,41 @@ No hay tests todavía. `catalog.js`, `github.js` y `views.js` están escritos co
 
 ---
 
+## Marca
+
+<img src="assets/brand/logo.svg" alt="" height="52">
+
+El isotipo son **dos raíles perforados de película con una estrella dentro**: el soporte y la valoración, que son las dos cosas que hace la app. Los archivos están en `assets/brand/`:
+
+| Archivo | Uso |
+|---|---|
+| `logo.svg` | Logotipo horizontal para fondos oscuros. El de por defecto |
+| `logo-light.svg` | Logotipo horizontal para fondos claros |
+| `logo-mono.svg` | Una sola tinta, hereda el color con `currentColor`. Para sellos y marcas de agua |
+| `isotipo.svg` | Solo la marca, cuadrada, con todo el detalle |
+
+Las letras del logotipo son **trazados, no texto**: el archivo se ve igual en cualquier ordenador sin tener Bebas Neue instalada, y no depende de que cargue ninguna fuente.
+
+### Paleta
+
+| | Hex | Papel |
+|---|---|---|
+| Rojo | `#b3312c` | Acciones principales, raíles del isotipo, obras "para el olvido" |
+| Oro | `#d1a355` | Marca, valoraciones, acentos |
+| Fondo | `#1a1210` | Base de la app |
+| Fondo suave | `#2b1c19` | Tarjetas y modales |
+| Texto | `#f5ece4` | Texto principal |
+| Texto atenuado | `#c9b8ae` | Texto secundario |
+| Línea | `#4a2e28` | Bordes y separadores |
+
+Tipografías: **Bebas Neue** para títulos, **Work Sans** para el resto.
+
+### Iconos de aplicación
+
+`assets/icons/favicon.svg` es una **versión simplificada a propósito**: sin perforaciones, sin borde interior y con la estrella más grande. A 16 píxeles el detalle del isotipo se denta y se convierte en ruido, así que la pestaña del navegador usa la versión maciza y `isotipo.svg` se reserva para tamaños de 32 píxeles en adelante.
+
+---
+
 ## Decisiones y límites conocidos
 
 **El token está en `localStorage`.** Es la única forma de escribir en GitHub sin montar un backend, y montarlo contradiría el objetivo del proyecto. Las mitigaciones son: token *fine-grained* limitado a un repo con un solo permiso, dependencias externas ancladas a una versión concreta, y todo dato del catálogo escapado antes de tocar el DOM. Aun así, es una decisión consciente con un coste: cualquier script que se ejecutase en la página podría leer ese token. No pongas ahí un token con permisos amplios.
@@ -240,9 +276,29 @@ Pon el resultado precedido de `sha384-` en el atributo `integrity`.
 
 ---
 
-## Roadmap: qué se reserva para la v2
+## Roadmap
 
 La v1 hace una cosa: registrar lo que has visto, puntuarlo y volver a encontrarlo. Todo lo de abajo se ha dejado fuera deliberadamente.
+
+## v2 — más datos y dos idiomas
+
+### Internacionalización (ES / EN)
+
+Que la plataforma se pueda usar en inglés, con detección automática vía `navigator.language` y un selector para forzar el idioma.
+
+El trabajo visible es mover todas las cadenas de `index.html` y `app.js` a `assets/js/i18n/es.js` y `en.js`, y hacer que `formatDate` deje de tener `'es-ES'` escrito a fuego en `utils.js`.
+
+El trabajo invisible es el que importa: hoy `tipo` guarda la etiqueta que se muestra (`"Película"`). Si la interfaz cambia de idioma, ese valor no puede seguir siendo el texto visible. Hay que separar la clave almacenada de la etiqueta traducida:
+
+```jsonc
+// ahora
+{ "tipo": "Película" }
+
+// v2
+{ "tipo": "pelicula" }   // clave estable; la etiqueta la pone el idioma activo
+```
+
+Eso es una migración del JSON, así que conviene que viaje junto al resto de cambios de esquema de abajo, en una sola migración versionada, y no en dos pasadas.
 
 ### Modelo de datos
 
@@ -262,6 +318,25 @@ La v1 hace una cosa: registrar lo que has visto, puntuarlo y volver a encontrarl
 - **Deshacer un borrado**, más allá del `confirm()` actual.
 - **Importar y exportar**, incluido CSV de Letterboxd.
 - **Offline real** con service worker, para poder escribir sin conexión y sincronizar al recuperarla.
+
+## v3 — fuera del navegador
+
+### Escritorio: un ejecutable
+
+La vía es **Tauri**: envuelve este mismo HTML, CSS y JavaScript en el motor web que ya trae el sistema operativo y produce un `.exe` de unos pocos megas. Electron haría lo mismo pero empaquetando Chromium entero, y el instalador se iría a más de 100 MB para una app que son 40 KB de código.
+
+Más allá del formato, la versión de escritorio desbloquea algo que el navegador no permite: **guardar el token en el almacén de credenciales del sistema** (el Administrador de credenciales de Windows, el llavero de macOS) en lugar de en `localStorage`. Eso elimina de raíz la principal pega de seguridad de la v1. Es el mejor argumento para hacerla, más que el icono en el escritorio.
+
+### Móvil
+
+Una aclaración antes de nada: **Docker no sirve para esto**. Un contenedor es un entorno Linux para ejecutar un servidor en una máquina; un teléfono no ejecuta contenedores, instala un APK, un IPA o una PWA. No hay forma de convertir un contenedor en una app de móvil.
+
+Las vías que sí llevan a una app en el teléfono, de menos a más esfuerzo:
+
+1. **PWA con service worker.** El `site.webmanifest` ya está puesto; falta el service worker. Con eso la app se instala desde el navegador, aparece con su icono en la pantalla de inicio y funciona sin conexión. Sin tiendas, sin cuentas de desarrollador y sin coste. Es el 90 % del resultado por el 10 % del trabajo.
+2. **Capacitor o TWA**, para empaquetar esa misma PWA en un APK o un IPA de verdad y poder subirla a las tiendas. Requiere Android Studio o Xcode y cuenta de desarrollador (25 $ una vez en Google, 99 $/año en Apple). Solo compensa si quieres distribuirla a otra gente.
+
+Docker sí tendría sentido en este proyecto en un caso concreto: si algún día se sustituyera GitHub por un servidor de sincronización propio, ese servidor se distribuiría como contenedor. Pero eso contradice la premisa de la app, que es justamente no tener servidor.
 
 ### Fuera de alcance
 

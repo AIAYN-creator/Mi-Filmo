@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 542 100" width="542" height="100" role="img" aria-labelledby="t">
+  <title id="t">Mi Filmo</title>
+  <!-- Logotipo horizontal para fondos claros: cambia la tinta del texto, el isotipo se mantiene. -->
+
+  <g transform="scale(1.5625)">
+    <rect width="64" height="64" rx="14" fill="#1a1210"/>
+
+    <rect x="5" y="8" width="9" height="48" rx="2" fill="#b3312c"/>
+    <rect x="7" y="12" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="7" y="23" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="7" y="34" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="7" y="45" width="5" height="6" rx="1.5" fill="#1a1210"/>
+
+    <rect x="50" y="8" width="9" height="48" rx="2" fill="#b3312c"/>
+    <rect x="52" y="12" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="52" y="23" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="52" y="34" width="5" height="6" rx="1.5" fill="#1a1210"/>
+    <rect x="52" y="45" width="5" height="6" rx="1.5" fill="#1a1210"/>
+
+    <polygon fill="#d1a355" points="32,16 36.06,26.42 47.22,27.06 38.56,34.13 41.40,44.94 32,38.90 22.60,44.94 25.44,34.13 16.78,27.06 27.94,26.42"/>
+  </g>
+
+  <g transform="translate(132 0)" fill="#1a1210" fill-rule="evenodd">
+    <path d="M0,100 L0,0 L17,0 L34,44 L51,0 L68,0 L68,100 L51,100 L51,32 L40,62 L28,62 L17,32 L17,100 Z"/>
+    <path d="M78,0 H95 V100 H78 Z"/>
+    <path d="M125,0 H177 V17 H142 V41 H171 V58 H142 V100 H125 Z"/>
+    <path d="M187,0 H204 V100 H187 Z"/>
+    <path d="M214,0 H231 V83 H264 V100 H214 Z"/>
+    <path d="M274,100 L274,0 L291,0 L308,44 L325,0 L342,0 L342,100 L325,100 L325,32 L314,62 L302,62 L291,32 L291,100 Z"/>
+    <path d="M372,0 H390 A20,20 0 0 1 410,20 V80 A20,20 0 0 1 390,100 H372 A20,20 0 0 1 352,80 V20 A20,20 0 0 1 372,0 Z M377,17 A8,8 0 0 0 369,25 V75 A8,8 0 0 0 377,83 H385 A8,8 0 0 0 393,75 V25 A8,8 0 0 0 385,17 Z"/>
+  </g>
+</svg>
